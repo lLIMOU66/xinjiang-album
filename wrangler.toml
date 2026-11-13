@@ -1,0 +1,21 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "xinjiang-album"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "."
+
+# ----------------------------------------------------------------------------
+# 环境变量
+# 把 CLOUDINARY_CLOUD 换成你自己的 Cloudinary Cloud Name（控制台首页能看到）
+# ----------------------------------------------------------------------------
+[vars]
+CLOUDINARY_CLOUD = "YOUR_CLOUD_NAME"
+
+# ----------------------------------------------------------------------------
+# KV 存储（点赞数 + 留言）
+# 首次部署前必须自己建一个，然后把 id 填进来：
+#   wrangler kv namespace create "ALBUM_KV"
+# 把命令输出里的 id 复制到下面。不填的话 /api/like 和 /api/messages 会 500。
+# ----------------------------------------------------------------------------
+[[kv_namespaces]]
+binding = "ALBUM_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"

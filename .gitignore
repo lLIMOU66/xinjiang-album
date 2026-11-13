@@ -1,0 +1,28 @@
+# 素材：不进仓库（体积大 + 隐私）
+# 注意这里必须写 /media/ 和 /assets/：
+#   如果只写 media/，会把 functions/media/ 这个目录也一起忽略掉，
+#   结果最关键的视频代理脚本 functions/media/video/[[path]].js 根本没被提交。
+/media/
+/assets/
+
+# 构建产物 / 中间文件
+tools/out/
+tools/.cache/
+tools/*.report.json
+tools/*.log
+tools/*.err
+*.tmp.mp4
+*.tmp.jpg
+
+# 密钥与本地配置
+.env
+.env.*
+tools/site.config.json
+.secrets/
+
+# 系统杂项
+.DS_Store
+Thumbs.db
+desktop.ini
+.wrangler/
+node_modules/

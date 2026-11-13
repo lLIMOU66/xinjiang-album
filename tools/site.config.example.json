@@ -1,0 +1,89 @@
+{
+  "_说明": "复制本文件为 site.config.json 再修改。site.config.json 已在 .gitignore 里，不会被提交。",
+
+  "source_dir": "D:/我的相册/青甘大环线",
+  "site_dir": ".",
+  "work_dir": "tools/out",
+
+  "_ffmpeg说明": "填 ffmpeg.exe 的绝对路径；如果 ffmpeg 已在 PATH 里，填 ffmpeg 即可",
+  "ffmpeg": "C:/ffmpeg/bin/ffmpeg.exe",
+
+  "trip_id": "qinggan-2026",
+  "trip_name": "青甘大环线",
+  "trip_subtitle": "从青海湖到敦煌",
+  "trip_place": "青海 · 甘肃",
+  "trip_period": "2026.04.10 — 04.28",
+  "trip_year": "2026",
+  "trip_season": "春",
+  "trip_blurb": "四月的青甘大环线。青海湖、翡翠湖、莫高窟、鸣沙山、七彩丹霞。",
+  "orientation": "landscape",
+  "works_title": "十九天，一条青甘大环线",
+  "works_lead": "按目的地分九段。",
+
+  "_首屏说明": "hero 是相册详情页首屏大图，cover 是首页卡片封面，两者可以是同一张",
+  "hero": "assets/p-20260413-059.webp",
+  "hero_alt": "茶卡盐湖",
+  "cover": "assets/p-20260413-059.webp",
+
+  "site_title": "我的旅行",
+  "site_sub": "走过的路，拍下的光",
+  "site_intro": "每一次出门，按行程整理成一本相册。",
+  "owner": "你的名字",
+  "owner_en": "YOUR NAME",
+  "updated": "2026.11",
+  "music": "assets/music.mp3",
+
+  "geo": [
+    {"n": "西宁", "lon": 101.78, "lat": 36.62},
+    {"n": "青海湖", "lon": 100.25, "lat": 36.86},
+    {"n": "敦煌", "lon": 94.66, "lat": 40.14}
+  ],
+
+  "_分类说明": "match 是关键词，会拿素材文件名和所在文件夹名去匹配；匹配不到的先落到 default_category，再靠 classify 手工纠正",
+  "categories": [
+    {
+      "id": "salt",
+      "name": "盐湖",
+      "match": ["盐湖", "茶卡", "翡翠湖", "察尔汗"],
+      "cover": "assets/p-20260413-013.webp",
+      "location": "翡翠湖 · 察尔汗 · 茶卡",
+      "tags": ["自然山海"]
+    },
+    {
+      "id": "road",
+      "name": "路途",
+      "match": ["路途", "公路", "车上"],
+      "cover": "assets/p-20260416-007.webp",
+      "location": "公路 · 小镇",
+      "tags": ["交通途中"]
+    }
+  ],
+  "default_category": "road",
+
+  "_classify说明": "日期 -> {序号: 分类id}。序号是按该日期内文件名排序后的第几张/第几段。跑完 scan 后看 inventory.json 再填这张表。",
+  "classify": {
+    "2026-04-13": {
+      "1": "road",
+      "2": "salt",
+      "3": "salt"
+    }
+  },
+
+  "photos": {
+    "max_width": 1600,
+    "quality": 82
+  },
+
+  "videos": {
+    "height": 1080,
+    "crf": 26,
+    "preset": "medium",
+    "max_mb": 60
+  },
+
+  "poster": {
+    "width": 960,
+    "quality": 80,
+    "at_second": 1
+  }
+}
