@@ -10,7 +10,7 @@
     python tools/upload_cloudinary.py --media media --max-mb 25
 
 输出：
-    tools/out/cloudinary_map.json   {"v-20260413-016.mp4": "/media/video/upload/v-20260413-016.mp4"}
+    tools/out/cloudinary_map.json   {"v-20260413-016.mp4": "/media/video/upload/album/v-20260413-016.mp4"}
 
 之后 build_site.py data 会读这个映射，把这些视频的 src 写成代理路径而不是本地路径。
 
@@ -58,11 +58,14 @@ def multipart(fields, file_path):
 
 def upload(cloud, key, secret, file_path, folder="album"):
     ts = str(int(time.time()))
-    sign_src = "folder=%s&timestamp=%s%s" % (folder, ts, secret)
-    signature = hashlib.sha1(sign_src.encode("utf-8")).hexdigest()
 
     # public_id 用文件名（不带扩展名），这样代理路径能对上
     public_id = os.path.splitext(os.path.basename(file_path))[0]
+
+    # 签名必须覆盖所有随文件一起提交的参数（file / api_key 除外），参数按字母序拼接。
+    # 少签一个参数，Cloudinary 直接返回 401 Invalid Signature，上传全部失败。
+    sign_src = "folder=%s&public_id=%s&timestamp=%s%s" % (folder, public_id, ts, secret)
+    signature = hashlib.sha1(sign_src.encode("utf-8")).hexdigest()
 
     fields = {
         "api_key": key,
@@ -125,10 +128,12 @@ def main():
         print("  上传 %s (%.1f MB) ..." % (fn, size_mb), flush=True)
         try:
             res = upload(cloud, key, secret, p, args.folder)
-            public_id = res.get("public_id", "")
-            # public_id 可能带 folder 前缀，代理路径只取最后的名字
-            name = public_id.split("/")[-1]
-            existing[fn] = "/media/video/upload/%s.mp4" % name
+            # public_id 会带 folder 前缀（album/v-xxx）。代理路径必须原样保留这段，
+            # 否则拼成 /video/upload/v-xxx.mp4，Cloudinary 上根本没这个文件，线上就是 404。
+            pid = (res.get("public_id") or "").strip("/")
+            if not pid:
+                pid = (args.folder + "/" + os.path.splitext(fn)[0]).lstrip("/")
+            existing[fn] = "/media/video/upload/%s.mp4" % pid
             ok += 1
             with open(map_path, "w", encoding="utf-8") as f:
                 json.dump(existing, f, ensure_ascii=False, indent=1)
