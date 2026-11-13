@@ -10,7 +10,7 @@
     python tools/build_site.py videos    # 视频转码到 1080p
     python tools/build_site.py posters   # 从视频抽封面帧
     python tools/build_site.py data      # 生成 data.js
-    python tools/build_site.py verify    # 校验所有引用文件存在
+    python tools/build_site.py verify    # 校验所有引用文件存在、码率达标
     python tools/build_site.py all       # 依次跑 photos/videos/posters/data/verify
 
 配置文件：tools/site.config.json（从 site.config.example.json 复制后改）
@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -30,8 +31,6 @@ import sys
 PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
 VIDEO_EXT = {".mp4", ".mov", ".m4v", ".avi", ".mkv"}
 
-# 日期正则：能匹配 20260413 / 2026-04-13 / 2026_04_13。
-# 注意日号要写成 (0[1-9]|1[0-9]|2[0-9]|3[01])，只写 0[1-9]|2[0-9] 会漏掉 11-19 号。
 DATE_RE = re.compile(r"(20\d{2})[-_]?(0[1-9]|1[0-2])[-_]?(0[1-9]|1[0-9]|2[0-9]|3[01])")
 
 
@@ -41,7 +40,8 @@ def load_config(path):
     with open(path, "r", encoding="utf-8") as f:
         cfg = json.load(f)
 
-    for k in ["source_dir", "site_dir", "categories"]:
+    required = ["source_dir", "site_dir", "categories"]
+    for k in required:
         if k not in cfg:
             sys.exit("配置缺少字段：%s" % k)
 
@@ -83,7 +83,7 @@ def run(cmd):
 
 
 def probe_duration(ffmpeg, path):
-    """用 ffmpeg -i 读时长；没装 ffprobe 时这是最可靠的办法。"""
+    """用 ffmpeg -i 读时长；没有 ffprobe 时这是最可靠的办法。"""
     r = run([ffmpeg, "-hide_banner", "-i", path])
     m = re.search(r"Duration: (\d+):(\d+):([\d.]+)", r.stderr or "")
     if not m:
@@ -92,7 +92,7 @@ def probe_duration(ffmpeg, path):
 
 
 # ----------------------------------------------------------------------------
-# scan
+# scan：扫描素材 + 出联系表
 # ----------------------------------------------------------------------------
 
 def stage_scan(cfg):
@@ -137,7 +137,14 @@ def stage_scan(cfg):
 # ----------------------------------------------------------------------------
 
 def classify(cfg):
+    """返回 {(date, seq): category_id}。
+
+    优先读 cfg['classify']（人工确认过的映射），
+    其次按 cfg['categories'][*]['match'] 里的关键词匹配文件所在目录名，
+    最后落到 cfg['default_category']。
+    """
     mapping = {}
+
     for date, nums in (cfg.get("classify") or {}).items():
         for num, cat in nums.items():
             mapping[(date, int(num))] = cat
@@ -151,7 +158,7 @@ def classify(cfg):
     return mapping, keyword_rules, default_cat
 
 
-def resolve_category(date, seq, folder_name, mapping, keyword_rules, default_cat):
+def resolve_category(cfg, date, seq, folder_name, mapping, keyword_rules, default_cat):
     if date and (date, seq) in mapping:
         return mapping[(date, seq)]
     for kw, cat in keyword_rules:
@@ -161,14 +168,16 @@ def resolve_category(date, seq, folder_name, mapping, keyword_rules, default_cat
 
 
 # ----------------------------------------------------------------------------
-# 照片
+# 照片：压缩成 webp
 # ----------------------------------------------------------------------------
 
 def stage_photos(cfg):
     try:
-        from PIL import Image, ImageOps
+        from PIL import Image
     except ImportError:
         sys.exit("需要 Pillow：pip install pillow")
+
+    from PIL import ImageOps
 
     inv = load_inventory(cfg)
     assets_dir = os.path.join(cfg["site_dir"], "assets")
@@ -210,7 +219,7 @@ def stage_photos(cfg):
 
 
 # ----------------------------------------------------------------------------
-# 视频
+# 视频：转码到 1080p
 # ----------------------------------------------------------------------------
 
 def stage_videos(cfg):
@@ -252,17 +261,20 @@ def stage_videos(cfg):
                out_path]
 
         r = run(cmd)
-        if os.path.exists(out_path) and os.path.getsize(out_path) > 10000:
+        # 判定成功看 ffmpeg 返回码 + 文件非空。不要用固定体积阈值——
+        # 短片段、低码率、静态画面的视频可能只有几 KB，用体积阈值会误报成"失败"。
+        if r.returncode == 0 and os.path.exists(out_path) and os.path.getsize(out_path) > 1000:
             size_mb = os.path.getsize(out_path) / 1024 / 1024
             dur = probe_duration(ff, out_path)
             kbps = os.path.getsize(out_path) * 8 / 1000 / max(dur, 0.1)
             done += 1
-            if kbps < 1500:
-                print("  【码率偏低】%s %.0f kbps，画质可能糊" % (out_name, kbps), flush=True)
+            # 静态风景、夜景这类低动态画面，码率天然就低，800 kbps 以下才需要人工复核
+            if kbps < 800:
+                print("  【码率偏低】%s %.0f kbps，建议看一遍成片确认不糊" % (out_name, kbps), flush=True)
             if size_mb > max_mb:
                 oversize.append((out_name, size_mb))
         else:
-            failed.append((item["path"], (r.stderr or "")[-300:]))
+            failed.append((item["path"], ("rc=%s " % r.returncode) + (r.stderr or "")[-300:]))
 
     print("视频：新转码 %d 段，跳过 %d 段，失败 %d 段" % (done, skipped, len(failed)))
     for p, err in failed[:10]:
@@ -346,6 +358,7 @@ def stage_data(cfg):
     media_dir = os.path.join(cfg["site_dir"], "media")
     assets_dir = os.path.join(cfg["site_dir"], "assets")
 
+    cats = {c["id"]: c for c in cfg["categories"]}
     cat_entries = {c["id"]: {"photos": [], "videos": []} for c in cfg["categories"]}
 
     counters = {"photo": {}, "video": {}}
@@ -356,7 +369,7 @@ def stage_data(cfg):
         counters[kind][date] = counters[kind].get(date, 0) + 1
         seq = counters[kind][date]
 
-        cat = resolve_category(item["date"], seq, folder, mapping, keyword_rules, default_cat)
+        cat = resolve_category(cfg, item["date"], seq, folder, mapping, keyword_rules, default_cat)
 
         if kind == "photo":
             name = "assets/p-%s-%03d.webp" % (date.replace("-", ""), seq)
@@ -432,7 +445,9 @@ def stage_data(cfg):
     with open(out, "w", encoding="utf-8", newline="\n") as f:
         f.write(payload)
 
-    print("data.js 已生成：%d 张照片、%d 段视频、%d 个分类" % (trips[0]["photoCount"], trips[0]["videoCount"], len(cfg["categories"])))
+    total_p = trips[0]["photoCount"]
+    total_v = trips[0]["videoCount"]
+    print("data.js 已生成：%d 张照片、%d 段视频、%d 个分类" % (total_p, total_v, len(cfg["categories"])))
     print("路径：%s" % out)
 
 
@@ -490,6 +505,8 @@ STAGES = {
     "data": stage_data,
     "verify": stage_verify,
 }
+
+ORDER = ["scan", "photos", "videos", "posters", "data", "verify"]
 
 
 def main():

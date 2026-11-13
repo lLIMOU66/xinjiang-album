@@ -3,14 +3,14 @@
 把超过 Pages 25MB 限制的视频上传到 Cloudinary，并生成代理路径映射。
 
 用法：
-    set CLOUDINARY_CLOUD_NAME 你的云名
-    set CLOUDINARY_API_KEY 你的Key
-    set CLOUDINARY_API_SECRET 你的Secret
+    setx CLOUDINARY_CLOUD_NAME 你的云名
+    setx CLOUDINARY_API_KEY 你的Key
+    setx CLOUDINARY_API_SECRET 你的Secret
 
     python tools/upload_cloudinary.py --media media --max-mb 25
 
 输出：
-    tools/out/cloudinary_map.json   {"v-20260413-016.mp4": "/media/video/upload/album/v-20260413-016.mp4"}
+    tools/out/cloudinary_map.json   {"v-20260413-016.mp4": "/media/video/upload/v-20260413-016.mp4"}
 
 之后 build_site.py data 会读这个映射，把这些视频的 src 写成代理路径而不是本地路径。
 

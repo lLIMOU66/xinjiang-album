@@ -20,6 +20,19 @@
 
 ---
 
+## 动手之前：先备好这两样
+
+| 要准备 | 什么时候需要 | 去哪拿 |
+|---|---|---|
+| 素材文件夹（文件名带日期） | 一开始就要 | 你自己的相册 |
+| Cloudflare 账号（邮箱 + **Global API Key** + Account ID） | 最后部署时 | dash.cloudflare.com → 个人资料页**底部** |
+| Cloudinary 账号（Cloud name / API Key / Secret） | 只有视频单段超 25MB 才需要 | cloudinary.com，免费、不绑卡 |
+
+两个账号都免费、都不用绑银行卡，但**必须你本人注册**。
+每一步在哪点、凭证长什么样、拿错会报什么错，全写在 [`docs/交接清单.md`](docs/交接清单.md)。
+
+---
+
 ## 三步跑起来
 
 ### 1. 装依赖
@@ -74,7 +87,7 @@ wrangler pages deploy . --project-name 你的项目名
 .
 ├── index.html / album.html     首页 + 相册页
 ├── style.css / theme.css       样式（含手机端拼贴布局）
-├── app.js / album.js / home.js 前端逻辑
+├── album.js / home.js          前端逻辑
 ├── config.js                   CDN 地址配置（一般不用改）
 ├── data.js                     所有行程数据（由脚本生成）
 ├── functions/
@@ -141,8 +154,8 @@ CRF 调太大。把 `videos.crf` 从 26 降到 23 或 20 重跑。
 
 ## 说明
 
-- `data.js` 里现在是演示数据，照片引用作者线上站点，克隆下来能直接看到效果。换成自己的素材后会被整份重写。
-- `media/` 和 `assets/` 在 `.gitignore` 里：素材体积大，而且不该公开。仓库只放代码。
+- `data.js` 里现在是演示数据，**3 张示例图以内联 base64 直接放在文件里**：不依赖任何线上站点，克隆下来断网打开也能看到完整效果。换成自己的素材后会被整份重写。
+- `media/` 和 `assets/` 在 `.gitignore` 里：素材体积大，而且不该公开。仓库只放代码和这 3 张示例图。
 - 点赞和留言的数据存在 Cloudflare KV，一个浏览器只能点一次赞，留言最多保留 200 条。
 
 ## License

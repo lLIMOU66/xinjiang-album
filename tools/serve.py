@@ -10,8 +10,10 @@
 import os
 import posixpath
 import re
+import sys
 import http.server
 import socketserver
+import urllib.parse
 
 PORT = int(os.environ.get("PORT", "8000"))
 
