@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>螳螂的旅行 · 旅行档案</title>
+<meta name="description" content="螳螂的旅行档案：每一次出门的照片与视频，按行程整理成册。" />
+<meta name="theme-color" content="#0d1428" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="theme.css" />
+</head>
+<body class="page-home">
+
+<div class="progress" id="progress"></div>
+
+<header class="nav" id="nav">
+  <a class="brand" href="index.html">螳螂<span>·</span>旅行</a>
+  <nav class="nav-links">
+    <a href="#trips">目录 <i>01</i></a>
+    <a href="#map">地图 <i>02</i></a>
+    <a href="#timeline">时间轴 <i>03</i></a>
+    <a href="#about">关于 <i>04</i></a>
+  </nav>
+</header>
+
+<button class="music-fab" id="music" type="button" aria-label="播放/暂停背景音乐" aria-pressed="false" data-label="背景音乐">
+  <span class="mf-ring" aria-hidden="true"></span>
+  <span class="mf-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+</button>
+
+<!-- 首屏 -->
+<section class="hhero" id="top">
+  <video class="hhero-video" id="hheroVideo" autoplay muted loop playsinline></video>
+  <img class="hhero-img" id="hheroImg" src="" alt="" fetchpriority="high" />
+  <div class="hhero-veil"></div>
+  <span class="hero-side" id="hheroSide">TRAVEL ARCHIVE · TANG LANG</span>
+
+  <div class="hhero-copy">
+    <p class="eyebrow">TRAVEL ARCHIVE / VOL. 01</p>
+    <h1 id="hTitle">螳螂的旅行</h1>
+    <p class="sub" id="hSub">走过的路，拍下的光</p>
+  </div>
+
+  <div class="hhero-foot">
+    <div class="hero-facts" id="hFacts"></div>
+    <a class="hero-scroll" href="#trips">向下滚动 <span>↓</span></a>
+  </div>
+</section>
+
+<!-- 01 旅行目录 -->
+<section class="section sec-trips" id="trips">
+  <header class="section-head">
+    <div class="sh-left">
+      <span class="sec-no">01</span>
+      <span class="sec-en">TRIPS / 目录</span>
+    </div>
+    <div class="sh-right">
+      <h2>每一次出门，<br />都留成一本册子</h2>
+      <p class="lead">按旅行编排。点进任意一本，看那次拍下的全部照片与视频——哪天、在哪、按行程排好。</p>
+    </div>
+  </header>
+
+  <div class="trip-grid" id="tripGrid"></div>
+  <div class="grid-end"><span>END OF INDEX</span><span id="tripCount"></span></div>
+</section>
+
+<!-- 02 地图 -->
+<section class="section sec-map" id="map">
+  <header class="section-head">
+    <div class="sh-left">
+      <span class="sec-no">02</span>
+      <span class="sec-en">MAP / 走过的地方</span>
+    </div>
+    <div class="sh-right">
+      <h2>把点，连成路</h2>
+      <p class="lead">同一个坐标框里，标出每次旅行落过的脚。虚线是路上，实点是停下的地方。</p>
+    </div>
+  </header>
+
+  <div class="map-wrap">
+    <div class="map-panel">
+      <svg id="mapSvg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" role="img" aria-label="旅行地点示意地图"></svg>
+      <span class="map-corner">N ↑</span>
+      <span class="map-scale">示意图 · 非等比投影</span>
+    </div>
+    <aside class="map-list" id="mapList"></aside>
+  </div>
+</section>
+
+<!-- 03 时间轴 -->
+<section class="section sec-timeline" id="timeline">
+  <header class="section-head">
+    <div class="sh-left">
+      <span class="sec-no">03</span>
+      <span class="sec-en">TIMELINE / 时间轴</span>
+    </div>
+    <div class="sh-right">
+      <h2>一条往回看的线</h2>
+      <p class="lead">从最近的一次往前排，每次旅行一条：时间、地点、留下多少。</p>
+    </div>
+  </header>
+
+  <ul class="tl" id="tl"></ul>
+</section>
+
+<!-- 04 关于 -->
+<section class="section sec-about" id="about">
+  <header class="section-head">
+    <div class="sh-left">
+      <span class="sec-no">04</span>
+      <span class="sec-en">ABOUT / 关于</span>
+    </div>
+    <div class="sh-right">
+      <h2>照片，<em>会记得。</em></h2>
+      <p class="lead" id="aboutLead">原片留在本地，这里只放为网页重新压制的版本。</p>
+    </div>
+  </header>
+
+  <div class="about-grid">
+    <div class="about-text">
+      <p id="aboutIntro"></p>
+      <p class="about-note">这个站点是静态的：没有后台、没有数据库。照片压成 WebP，视频压到 1080p，目录随新的旅行更新。</p>
+    </div>
+    <div class="about-stats" id="hStats"></div>
+  </div>
+
+  <!-- 点赞 + 留言板 -->
+  <section class="engage" id="engage">
+    <div class="like-box">
+      <button class="like-btn" id="likeBtn" type="button" aria-pressed="false">
+        <span class="like-heart">♥</span>
+        <span class="like-text">给作者点个赞</span>
+      </button>
+      <p class="like-count" id="likeCount">—</p>
+    </div>
+
+    <div class="msg-box">
+      <h3 class="msg-title">留给作者的话</h3>
+      <form class="msg-form" id="msgForm">
+        <input type="text" id="msgName" placeholder="你的昵称" maxlength="20" required />
+        <textarea id="msgText" placeholder="写下你想说的…" rows="3" maxlength="200" required></textarea>
+        <button type="submit" id="msgSubmit">发送</button>
+      </form>
+      <ul class="msg-list" id="msgList"></ul>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <div class="co-item"><b id="coName">螳螂的旅行</b><span id="coArchive">2024 — 2026 · 逐次归档</span></div>
+    <div class="co-item"><b>媒体规格</b><span>照片 WebP · 视频 1080p H.264</span></div>
+    <div class="co-item"><b>音乐</b><span>Ayasa绚沙 · VOICES (Strings ver.)</span></div>
+    <a class="to-top" href="#top">回到顶部 ↑</a>
+  </footer>
+</section>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="home.js"></script>
+</body>
+</html>
