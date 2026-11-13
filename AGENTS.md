@@ -18,7 +18,7 @@
 | 3. Cloudinary 账号 | Cloud Name / API Key / API Secret | cloudinary.com 免费注册，不用绑卡 |
 | 4. Cloudflare 账号 | 邮箱 + Global API Key + Account ID | dash.cloudflare.com → 我的个人资料 → API 令牌 |
 
-如果用户的视频总量不大（单段都小于 25MB），Cloudinary 可以不用，跳过第 7 步。
+如果用户的视频总量不大（单段都小于 25MB），Cloudinary 可以不用，跳过第 5 步和上传脚本。
 
 ---
 
@@ -69,7 +69,7 @@ python tools/build_site.py scan
 
 打开 `tools/out/inventory.json`，按日期分组，**逐组看照片**再做分类。
 
-绠对不要只靠文件夹名或拍摄时间自动归类。真实情况永远是：同一天里混着湖、公路、饭、合影。当时这个项目就是靠逐张看联系表才分对的。
+绝对不要只靠文件夹名或拍摄时间自动归类。真实情况永远是：同一天里混着湖、公路、饭、合影。当时这个项目就是靠逐张看联系表才分对的。
 
 看完把结果写进 `site.config.json` 的 `classify`：
 
