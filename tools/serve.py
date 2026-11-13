@@ -10,7 +10,6 @@
 import os
 import posixpath
 import re
-import sys
 import http.server
 import socketserver
 
@@ -86,7 +85,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("本地预览： http://localhost:%d" % PORT)
