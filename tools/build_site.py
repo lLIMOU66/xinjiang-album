@@ -56,7 +56,9 @@ def load_config(path):
     cfg["videos"].setdefault("height", 1080)
     cfg["videos"].setdefault("crf", 26)
     cfg["videos"].setdefault("preset", "medium")
-    cfg["videos"].setdefault("max_mb", 60)
+    # Cloudflare Pages 单文件硬上限 25 MiB，留 1 MiB 余量：超过就必须走 Cloudinary。
+    # 不要把它设成 60/100——那是 Cloudinary 的上限，不是 Pages 的。
+    cfg["videos"].setdefault("max_mb", 24)
 
     cfg.setdefault("poster", {})
     cfg["poster"].setdefault("width", 960)
@@ -234,7 +236,7 @@ def stage_videos(cfg):
     max_mb = cfg["videos"]["max_mb"]
 
     counters = {}
-    done, skipped, failed, oversize = 0, 0, [], []
+    done, skipped, failed, oversize, toobig = 0, 0, [], [], []
 
     for item in inv["files"]:
         if item["kind"] != "video":
@@ -273,6 +275,9 @@ def stage_videos(cfg):
                 print("  【码率偏低】%s %.0f kbps，建议看一遍成片确认不糊" % (out_name, kbps), flush=True)
             if size_mb > max_mb:
                 oversize.append((out_name, size_mb))
+            # Cloudinary 免费版单视频上限 100 MB：超过这条线两边都放不下，只能切段
+            if size_mb > 100:
+                toobig.append((out_name, size_mb))
         else:
             failed.append((item["path"], ("rc=%s " % r.returncode) + (r.stderr or "")[-300:]))
 
@@ -281,9 +286,16 @@ def stage_videos(cfg):
         print("  失败：%s -> %s" % (os.path.basename(p), err))
     if oversize:
         print("")
-        print("【超过 %d MB 的视频】这些必须走 Cloudinary 上传，不能直接进 Pages：" % max_mb)
+        print("【超过 %d MB 的视频】Cloudflare Pages 单文件上限 25 MiB，这些放不进 Pages，" % max_mb)
+        print("必须走 Cloudinary 上传（免费版单视频上限 100 MB）：")
         for name, mb in oversize:
             print("  %s  %.1f MB" % (name, mb))
+    if toobig:
+        print("")
+        print("【超过 100 MB 的视频】Cloudinary 免费版也放不下，必须处理后再上传：")
+        for name, mb in toobig:
+            print("  %s  %.1f MB" % (name, mb))
+        print("处理办法：按镜头切段，或把 height 降到 720、crf 提到 30 重压。")
 
 
 # ----------------------------------------------------------------------------

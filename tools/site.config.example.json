@@ -78,7 +78,7 @@
     "height": 1080,
     "crf": 26,
     "preset": "medium",
-    "max_mb": 60
+    "max_mb": 24
   },
 
   "poster": {
